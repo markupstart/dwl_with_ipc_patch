@@ -1,3 +1,6 @@
+Added ipc patch, autostart, borders, centeredmaster, fakefullscreen, movestack, namedscratchpads, and pertag  patches. Also reverted a commit to prevent steam from locking up the system.
+This is my alternate DWl that supports external bars such as waybar.
+
 # dwl - dwm for Wayland
 
 Join us on our IRC channel: [#dwl on Libera Chat]  
