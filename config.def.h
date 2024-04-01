@@ -6,17 +6,18 @@
 /* appearance */
 static const int sloppyfocus               = 1;  /* focus follows mouse */
 static const int bypass_surface_visibility = 0;  /* 1 means idle inhibitors will disable idle tracking even if it's surface isn't visible  */
-static const unsigned int borderpx         = 1;  /* border pixel of windows */
-static const unsigned int borderspx        = 0;  /* width of the border that start from outside the windows */
-static const unsigned int borderepx        = 0;  /* width of the border that start from inside the windows */
+static const unsigned int borderpx         = 2;  /* border pixel of windows */
+static const unsigned int borderspx        = 2;  /* width of the border that start from outside the windows */
+static const unsigned int borderepx        = 2;  /* width of the border that start from inside the windows */
 static const unsigned int borderspx_offset = 0;  /* offset of the border that start from outside the windows */
 static const unsigned int borderepx_negative_offset = 0; /* offset of the border that start from inside the windows */
+static const unsigned int snap             = 32; /* snap pixel */
 static const float rootcolor[]             = COLOR(0x222222ff);
 static const float bordercolor[]           = COLOR(0x444444ff);
 static const float borderscolor[]          = COLOR(0x444444ff); /* color of the border that start from outside the windows */
 static const float borderecolor[]          = COLOR(0x444444ff); /* color of the border that start from inside the windows */
-static const int border_color_type         = BrdOriginal; /* borders to be colored (focuscolor, urgentcolor) */
-static const float focuscolor[]            = COLOR(0x005577ff);
+static const int border_color_type         = BrdEnd; /* borders to be colored (focuscolor, urgentcolor) */
+static const float focuscolor[]            = COLOR(0xffa500ff);
 static const float urgentcolor[]           = COLOR(0xff0000ff);
 /* To conform the xdg-protocol, set the alpha to zero to restore the old behavior */
 static const float fullscreen_bg[]         = {0.1f, 0.1f, 0.1f, 1.0f}; /* You can also use glsl colors */
@@ -142,7 +143,6 @@ static const enum libinput_config_tap_button_map button_map = LIBINPUT_CONFIG_TA
 /* commands */
 static const char *termcmd[] = { "alacritty", NULL };
 static const char *menucmd[] = {"fuzzel", NULL };
-static const char *menucmd2[] = {"wm", NULL };
 static const char *browsercmd[] = {"firefox", NULL };
 static const char *discordcmd[] = {"discord", NULL };
 static const char *gamingcmd[] = {"lutris", NULL };
@@ -150,18 +150,17 @@ static const char *recordingcmd[] = {"obs", NULL };
 static const char *thunarcmd[] = {"thunar", NULL };
 static const char *grimcmd[] = {"grim", NULL };
 static const char *gpucmd[] = {"killall", "-SIGUSR1", "gpu-screen-recorder", NULL };
-static const char *btopcmd[] = {"alacritty", "-e" "btop", NULL };
 static const char *mutecmd[] = {"pw-volume", "mute", "toggle", NULL };
 static const char *voldowncmd[] = {"pw-volume","change", "-2.5%", NULL };
 static const char *volupcmd[] = {"pw-volume", "change", "+2.5%", NULL };
-
+static const char *barcmd[] = {"killall", "waybar", NULL };
+static const char *bar2cmd[] = {"waybar", NULL };
 /* named scratchpads - First arg only serves to match against key in rules*/
 static const char *scratchpadcmd[] = { "s", "qalculate-gtk", NULL };
 
 static const Key keys[] = {
 	/* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
 	/* modifier                  key                 function        argument */
-	{ MODKEY, 		     XKB_KEY_e,          spawn,          {.v = menucmd2} },
 	{ MODKEY,                    XKB_KEY_p,          spawn,          {.v = menucmd} },
 	{ MODKEY,		     XKB_KEY_a,   	 spawn,          {.v = termcmd} },
 	{ MODKEY, 		     XKB_KEY_f,   	 spawn,          {.v = browsercmd} },
@@ -175,11 +174,12 @@ static const Key keys[] = {
 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_M,          spawn,		 {.v = mutecmd } },
 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_D,          spawn,		 {.v = voldowncmd } },
 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_U,		 spawn,		 {.v = volupcmd } },
-	{ MODKEY,                    XKB_KEY_b,          togglebar,      {0} },
-	{ MODKEY,                    XKB_KEY_j,          focusstack,     {.i = +1} },
-	{ MODKEY,                    XKB_KEY_k,          focusstack,     {.i = -1} },
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_J,          movestack,      {.i = +1} },
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_K,          movestack,      {.i = -1} },
+	{ MODKEY,                    XKB_KEY_b,          spawn, 	 {.v = barcmd} },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_B,          spawn, 	 {.v = bar2cmd} },
+	{ MODKEY,                    XKB_KEY_k,          focusstack,     {.i = +1} },
+	{ MODKEY,                    XKB_KEY_j,          focusstack,     {.i = -1} },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_K,          movestack,      {.i = +1} },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_J,          movestack,      {.i = -1} },
 	{ MODKEY,                    XKB_KEY_i,          incnmaster,     {.i = +1} },
 	{ MODKEY,                    XKB_KEY_d,          incnmaster,     {.i = -1} },
 	{ MODKEY,                    XKB_KEY_h,          setmfact,       {.f = -0.05f} },

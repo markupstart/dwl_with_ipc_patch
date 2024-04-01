@@ -2091,6 +2091,7 @@ void
 motionnotify(uint32_t time, struct wlr_input_device *device, double dx, double dy,
 		double dx_unaccel, double dy_unaccel)
 {
+int nx, ny;
 	double sx = 0, sy = 0, sx_confined, sy_confined;
 	Client *c = NULL, *w = NULL;
 	LayerSurface *l = NULL;
@@ -2136,7 +2137,17 @@ motionnotify(uint32_t time, struct wlr_input_device *device, double dx, double d
 	/* If we are currently grabbing the mouse, handle and return */
 	if (cursor_mode == CurMove) {
 		/* Move the grabbed client to the new position. */
-		resize(grabc, (struct wlr_box){.x = ROUND(cursor->x) - grabcx, .y = ROUND(cursor->y) - grabcy,
+		nx = ROUND(cursor->x) - grabcx;
+		ny = ROUND(cursor->y) - grabcy;
+		if (abs(selmon->w.x - nx) < snap)
+			nx = selmon->w.x;
+		else if (abs((selmon->w.x + selmon->w.width) - (nx + grabc->geom.width)) < snap)
+			nx = selmon->w.x + selmon->w.width - grabc->geom.width;
+		if (abs(selmon->w.y - ny) < snap)
+			ny = selmon->w.y;
+		else if (abs((selmon->w.y + selmon->w.height) - (ny + grabc->geom.height)) < snap)
+			ny = selmon->w.y + selmon->w.height - grabc->geom.height;
+		resize(grabc, (struct wlr_box){.x = nx, .y = ny,
 			.width = grabc->geom.width, .height = grabc->geom.height}, 1);
 		return;
 	} else if (cursor_mode == CurResize) {
@@ -3446,21 +3457,18 @@ void
 configurex11(struct wl_listener *listener, void *data)
 {
 	Client *c = wl_container_of(listener, c, configure);
-	struct wlr_xwayland_surface_configure_event *ev = data;
-	struct wlr_xwayland_surface *xsurface = c->surface.xwayland;
+	struct wlr_xwayland_surface_configure_event *event = data;
 	/* TODO: figure out if there is another way to do this */
-	if (!xsurface->surface || !xsurface->surface->mapped) {
-		wlr_xwayland_surface_configure(xsurface, ev->x, ev->y, ev->width, ev->height);
+	if (!c->mon) {
+		wlr_xwayland_surface_configure(c->surface.xwayland,
+				event->x, event->y, event->width, event->height);
 		return;
 	}
-	if (c->isfloating || client_is_unmanaged(c)) {
-		resize(c, (struct wlr_box){.x = ev->x, .y = ev->y,
-				.width = ev->width + 2*c->bw, .height = ev->height + 2*c->bw}, 0);
-
-		wlr_xwayland_surface_configure(xsurface, ev->x, ev->y, ev->width, ev->height);
-	} else {
-		wlr_xwayland_surface_configure(xsurface, c->geom.x, c->geom.y, c->geom.width, c->geom.height);
-	}
+	if (c->isfloating || client_is_unmanaged(c))
+		resize(c, (struct wlr_box){.x = event->x, .y = event->y,
+				.width = event->width + c->bw * 2, .height = event->height + c->bw * 2}, 0);
+	else
+		arrange(c->mon);
 }
 
 void
